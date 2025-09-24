@@ -213,6 +213,39 @@ LEPTOS_RELOAD_PORT="3001"
 
 最後に、サーバーバイナリを実行します。
 
+## GitHub Actions CI/CD
+
+このプロジェクトはGitHub Actionsを使用して自動化されたCI/CDパイプラインを提供します。
+
+### 自動化された機能
+
+- ✅ **E2Eテスト**: Playwrightを使用したクロスブラウザテスト
+- ✅ **Dockerビルド**: マルチアーキテクチャ対応のDockerイメージ
+- ✅ **セキュリティスキャン**: Trivyによる脆弱性チェック
+- ✅ **コード品質**: clippyとrustfmtによる品質チェック
+- ✅ **自動デプロイ**: GitHub Container Registryへのプッシュ
+
+### セットアップ
+
+1. **GitHubシークレットの設定**:
+   - `GEMINI_API_KEY`: Google Gemini APIキーを設定
+
+2. **ワークフローの確認**:
+   - `.github/workflows/ci-cd.yml`: メインのCI/CDパイプライン
+   - `.github/workflows/security-quality.yml`: セキュリティと品質チェック
+
+詳細な設定手順は[GITHUB_ACTIONS_SETUP.md](GITHUB_ACTIONS_SETUP.md)を参照してください。
+
+## Docker イメージ
+
+GitHub Container RegistryからDockerイメージを取得できます：
+
+```bash
+# 最新版を実行
+docker run -p 3000:3000 -e GEMINI_API_KEY=your_key_here \
+  ghcr.io/yourusername/self-changer:main
+```
+
 ## ライセンス
 
 このプロジェクトはMITライセンスの下で公開されています。詳細は[LICENSE](LICENSE)ファイルを参照してください。

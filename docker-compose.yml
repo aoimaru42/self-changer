@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  self-changer:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - LEPTOS_OUTPUT_NAME=self-changer
+      - LEPTOS_SITE_ROOT=site
+      - LEPTOS_SITE_PKG_DIR=pkg
+      - LEPTOS_SITE_ADDR=0.0.0.0:3000
+      - LEPTOS_RELOAD_PORT=3001
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Development service with hot reload
+  self-changer-dev:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - LEPTOS_OUTPUT_NAME=self-changer
+      - LEPTOS_SITE_ROOT=site
+      - LEPTOS_SITE_PKG_DIR=pkg
+      - LEPTOS_SITE_ADDR=0.0.0.0:3000
+      - LEPTOS_RELOAD_PORT=3001
+    volumes:
+      - .:/app
+    command: cargo leptos watch
+    profiles:
+      - dev
