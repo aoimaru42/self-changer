@@ -1,0 +1,20 @@
+{
+  "name": "end2end",
+  "version": "1.0.0",
+  "description": "E2E tests for self-changer app",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "test:debug": "playwright test --debug"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.44.1",
+    "@types/node": "^20.12.12",
+    "typescript": "^5.4.5"
+  }
+}
