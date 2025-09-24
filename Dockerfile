@@ -1,5 +1,5 @@
 # Multi-stage build for Rust application
-FROM rust:1.77-slim as builder
+FROM rust:1.82-slim as builder
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -9,7 +9,14 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Install cargo-leptos
-RUN cargo install cargo-leptos --locked
+RUN cargo install cargo-leptos@0.2.28 --locked
+
+# Add WebAssembly target
+RUN rustup target add wasm32-unknown-unknown
+
+# Add WebAssembly target for nightly (used by rust-toolchain.toml)
+RUN rustup toolchain install nightly --component rust-src
+RUN rustup target add wasm32-unknown-unknown --toolchain nightly
 
 # Set working directory
 WORKDIR /app
