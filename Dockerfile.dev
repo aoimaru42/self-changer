@@ -1,5 +1,5 @@
-# マルチステージビルドを使用してRustアプリケーションをビルド
-FROM rust:1.82-slim as builder
+# 開発用Dockerfile（ホットリロード対応）
+FROM rust:1.82-slim
 
 # システムの依存関係をインストール
 RUN apt-get update && apt-get install -y \
@@ -32,29 +32,8 @@ RUN cargo +nightly install wasm-bindgen-cli
 # 作業ディレクトリを設定
 WORKDIR /app
 
-# プロジェクト全体をコピー
-COPY . .
-
-# アプリケーションをビルド
-RUN cargo leptos build --release --features ssr
-
-# 本番用の軽量イメージ
-FROM debian:bookworm-slim
-
-# システムの依存関係をインストール
-RUN apt-get update && apt-get install -y \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
-
-# 作業ディレクトリを設定
-WORKDIR /app
-
-# ビルドされたアプリケーションをコピー
-COPY --from=builder /app/target/release/server ./
-COPY --from=builder /app/target/site ./site
-
-# ポート3000を公開
-EXPOSE 3000
+# ポート3000と3001を公開
+EXPOSE 3000 3001
 
 # 環境変数を設定
 ENV LEPTOS_OUTPUT_NAME="self-changer"
@@ -63,5 +42,5 @@ ENV LEPTOS_SITE_PKG_DIR="pkg"
 ENV LEPTOS_SITE_ADDR="0.0.0.0:3000"
 ENV LEPTOS_RELOAD_PORT="3001"
 
-# アプリケーションを実行
-CMD ["./server"]
+# 開発サーバーを起動
+CMD ["cargo", "leptos", "watch"]

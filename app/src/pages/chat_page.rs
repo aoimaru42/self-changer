@@ -129,15 +129,14 @@ pub fn ChatPage() -> impl IntoView {
                                 } else {
                                     "padding: 12px 16px; border-radius: 18px; border-bottom-left-radius: 4px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); max-width: 85%; text-align: left; background-color: #e5e7eb; color: #1f2937;"
                                 };
-                                // element_stylesの変更を明示的に追跡
+                                // element_stylesの変更を明示的に追跡（リアクティブに更新される）
                                 let extras_map = element_styles.get();
                                 if let Some(extra) = extras_map.get(&msg.id) {
                                     if extra.trim().is_empty() {
                                         base_styles.to_string()
                                     } else {
                                         // 動的スタイルをベーススタイルの後に追加（後から適用されるため優先される）
-                                        let final_styles = format!("{} {}", base_styles, extra);
-                                        final_styles
+                                        format!("{} {}", base_styles, extra)
                                     }
                                 } else {
                                     base_styles.to_string()

@@ -91,7 +91,8 @@ pub fn send_message_to_api(params: ApiCallParams) {
                 }
         
                 // スタイル更新はCSSプロパティ形式で処理
-                if let Some(element_updates) = res.change_style_elements {
+                let element_updates_clone = res.change_style_elements.clone();
+                if let Some(element_updates) = element_updates_clone {
                     params.set_element_styles.update(|styles| {
                         for update in element_updates {
                             styles
@@ -137,6 +138,24 @@ pub fn send_message_to_api(params: ApiCallParams) {
                         is_user: false,
                     });
                 });
+
+                // 一般的なスタイル変更要求の場合、新しいメッセージ（AIの返信）にもスタイルを適用
+                if let Some(element_updates) = &res.change_style_elements {
+                    // 全ての要素に同じスタイルが適用されているかチェック（一般的なスタイル変更要求）
+                    let all_elements_same_style = element_updates.len() > 1 && 
+                        element_updates.iter().all(|update| update.styles == element_updates[0].styles);
+                    
+                    if all_elements_same_style {
+                        // 新しいメッセージ（AIの返信）にも同じスタイルを適用
+                        let new_message_id = params.current_messages.len(); // ユーザーメッセージ追加後のID
+                        let style_to_apply = element_updates[0].styles.clone();
+                        
+                        params.set_element_styles.update(|styles| {
+                            styles.insert(new_message_id, style_to_apply);
+                        });
+                    }
+                }
+
             },
             Err(e) => {
                 log::error!("API rewuest failed: {:?}", e);

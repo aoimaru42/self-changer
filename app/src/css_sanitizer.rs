@@ -174,6 +174,19 @@ impl CssSanitizer {
             return true;
         }
         
+        // フォントファミリーの値（クォートで囲まれた文字列）
+        if value.starts_with('"') && value.ends_with('"') {
+            return true;
+        }
+        if value.starts_with('\'') && value.ends_with('\'') {
+            return true;
+        }
+        
+        // フォントファミリーの値（カンマ区切り）
+        if value.contains(',') && !value.contains("rgb") && !value.contains("hsl") {
+            return true;
+        }
+        
         // 数値のみの場合も許可
         if value.chars().all(|c| c.is_ascii_digit() || c == '.' || c == '-') {
             return true;

@@ -30,14 +30,19 @@ pub async fn send_message(_req: SendMessageRequest) -> Result<SendMessageRespons
             - フィールドは必ずすべて含める。null は使わない。
             - chat_container_styles: CSSプロパティ文字列。未変更は空文字 ""。
             - change_style_elements, new_elements: 必ず配列。未変更は []。
-            - CSSプロパティのみを使用すること（background-color, color, font-size, margin, padding, border-radius等）。Tailwind CSSクラスは禁止。
-            - CSSプロパティは標準的な形式で記述（例: "background-color: #ff0000; color: white; font-size: 16px;"）
+            - CSSプロパティのみを使用すること（background-color, color, font-size, font-family, font-weight, margin, padding, border-radius等）。Tailwind CSSクラスは禁止。
+            - CSSプロパティは標準的な形式で記述（例: "background-color: #ff0000; color: white; font-size: 16px; font-family: Arial, sans-serif;"）
             - 色の指定: #ff0000, rgb(255,0,0), rgba(255,0,0,0.5), hsl(0,100%,50%) 等の標準形式
             - サイズ指定: px, em, rem, %, vh, vw 等の標準単位
+            - フォント指定: font-familyプロパティで指定（例: "Arial, sans-serif", "Times New Roman, serif", "Courier New, monospace"）
+            - 文字の太さ: font-weightプロパティで指定（bold, normal, 100-900の数値）
             - 画像表示: imgタグを使用し、attributesにsrc（画像URL）とalt（代替テキスト）を指定
             - 危険なプロパティ（javascript:, expression(), url(javascript:)等）は絶対に使用しない
             - プレースホルダ（{answer} や {new_elements} 等）やテンプレ文字列は禁止。必ず具体的な値のみ。
             - UI変更に関係ないメッセージを受け付けた場合は、messageフィールドに UIの更新をしていない旨のメッセージを返す。
+            - 特定の要素にスタイルを適用する際は、その要素のみを指定し、他の要素は既存のスタイルを保持する（デフォルトに戻さない）
+            - スタイルの永続性: 一度適用されたスタイルは、明示的に変更されるまで保持される
+            - 一般的なスタイル変更要求の場合、新しいメッセージ（AIの返信）にも同じスタイルを適用する
             - 型:
               success: bool
               message: string
@@ -60,19 +65,41 @@ pub async fn send_message(_req: SendMessageRequest) -> Result<SendMessageRespons
             {"success": true, "message": "全ての吹き出しを黄色にしました", "chat_container_styles": "", "change_style_elements": [{"id": 0, "styles": "background-color: #ffff00;"}, {"id": 1, "styles": "background-color: #ffff00;"}, {"id": 2, "styles": "background-color: #ffff00;"}], "new_elements": []}
             例6: ユーザー側の吹き出しを黄色、AI側の吹き出しを紫にして
             {"success": true, "message": "ユーザー側の吹き出しを黄色、AI側の吹き出しを紫にしました", "chat_container_styles": "", "change_style_elements": [{"id": 0, "styles": "background-color: #ffff00;"}, {"id": 1, "styles": "background-color: #800080; color: white;"}, {"id": 2, "styles": "background-color: #ffff00;"}], "new_elements": []}
-            例7: ボタンを追加して
+            例7: 文字色を赤にして
+            {"success": true, "message": "文字色を赤に変更しました", "chat_container_styles": "", "change_style_elements": [{"id": 0, "styles": "color: #ff0000;"}, {"id": 1, "styles": "color: #ff0000;"}, {"id": 2, "styles": "color: #ff0000;"}], "new_elements": []}
+            例8: フォントをArialに変更して
+            {"success": true, "message": "フォントをArialに変更しました", "chat_container_styles": "", "change_style_elements": [{"id": 0, "styles": "font-family: Arial, sans-serif;"}, {"id": 1, "styles": "font-family: Arial, sans-serif;"}, {"id": 2, "styles": "font-family: Arial, sans-serif;"}], "new_elements": []}
+            例9: 文字を太字にして
+            {"success": true, "message": "文字を太字にしました", "chat_container_styles": "", "change_style_elements": [{"id": 0, "styles": "font-weight: bold;"}, {"id": 1, "styles": "font-weight: bold;"}, {"id": 2, "styles": "font-weight: bold;"}], "new_elements": []}
+            例10: ボタンを追加して
             {"success": true, "message": "ボタンを追加しました", "chat_container_styles": "", "change_style_elements": [], "new_elements": [{"id": 1, "tag": "button", "text": "新しいボタン", "styles": "background-color: #10b981; color: white; font-weight: bold; padding: 8px 16px; border-radius: 4px;", "attributes": {}}]}
-            例8: 画像を表示して
+            例11: 画像を表示して
             {"success": true, "message": "画像を表示しました", "chat_container_styles": "", "change_style_elements": [], "new_elements": [{"id": 1, "tag": "img", "text": null, "styles": "width: 256px; height: 192px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);", "attributes": {"src": "https://picsum.photos/400/300", "alt": "サンプル画像"}}]}
+            例12: 一番上の吹き出しだけ青にして（他の要素は既存スタイルを保持）
+            {"success": true, "message": "一番上の吹き出しを青にしました", "chat_container_styles": "", "change_style_elements": [{"id": 0, "styles": "background-color: #3b82f6; color: white;"}], "new_elements": []}
+            例13: 2番目のメッセージだけ赤にして（他の要素は既存スタイルを保持）
+            {"success": true, "message": "2番目のメッセージを赤にしました", "chat_container_styles": "", "change_style_elements": [{"id": 1, "styles": "background-color: #ef4444; color: white;"}], "new_elements": []}
+            例14: 全ての吹き出しを黄色にして
+            {"success": true, "message": "全ての吹き出しを黄色にしました", "chat_container_styles": "", "change_style_elements": [{"id": 0, "styles": "background-color: #ffff00;"}, {"id": 1, "styles": "background-color: #ffff00;"}, {"id": 2, "styles": "background-color: #ffff00;"}], "new_elements": []}
+            例15: 一番上の吹き出しだけ青にして（他の要素は黄色のまま保持）
+            {"success": true, "message": "一番上の吹き出しを青にしました", "chat_container_styles": "", "change_style_elements": [{"id": 0, "styles": "background-color: #3b82f6; color: white;"}], "new_elements": []}
+            例16: 全ての吹き出しを黄色にして（新しいメッセージにも適用）
+            {"success": true, "message": "全ての吹き出しを黄色にしました", "chat_container_styles": "", "change_style_elements": [{"id": 0, "styles": "background-color: #ffff00;"}, {"id": 1, "styles": "background-color: #ffff00;"}, {"id": 2, "styles": "background-color: #ffff00;"}, {"id": 3, "styles": "background-color: #ffff00;"}], "new_elements": []}
             
             重要なルール:
-            - 一般的なスタイル変更要求（「吹き出しを○○にして」「メッセージを○○にして」等）の場合、現在存在する全てのメッセージ要素（id: 0, 1, 2, ...）に同じスタイルを適用する
-            - 特定要素指定（「最初の」「2番目の」等）の場合、指定された要素のみに適用する
+            - 一般的なスタイル変更要求（「吹き出しを○○にして」「メッセージを○○にして」「文字色を○○にして」「フォントを○○にして」等）の場合、現在存在する全てのメッセージ要素（id: 0, 1, 2, ...）に同じスタイルを適用する
+            - 一般的なスタイル変更要求の場合、新しいメッセージ（AIの返信）にも同じスタイルを適用する（現在のメッセージ総数と同じIDで指定）
+            - 特定要素指定（「最初の」「2番目の」「一番上の」「一番下の」等）の場合、指定された要素のみに適用し、他の要素は既存のスタイルを保持する
             - ユーザー側指定（「ユーザー側」「ユーザーの吹き出し」「私の吹き出し」等）の場合、is_user=trueのメッセージ（通常は奇数ID: 1, 3, 5...）に適用する
             - AI側指定（「AI側」「AIの吹き出し」「ボットの吹き出し」等）の場合、is_user=falseのメッセージ（通常は偶数ID: 0, 2, 4...）に適用する
             - 新要素追加後はIDマッピングが変動する可能性があるため、現在のメッセージ構造を考慮して適切なIDを選択する
             - CSSプロパティの最後には必ずセミコロン（;）を付ける
             - JSON構文エラー防止のため、stylesフィールドの値は必ずダブルクォートで囲む
+            - スタイル変更は永続的に適用される。一度変更したスタイルは、明示的に変更するまで保持される
+            - 特定の要素にスタイルを適用する際は、その要素のみを指定し、他の要素は既存のスタイルを保持する（デフォルトに戻さない）
+            - フォント変更は「font-family」プロパティを使用し、フォールバックフォントも含める（例: "Arial, sans-serif"）
+            - 文字色変更は「color」プロパティを使用し、16進数カラーコード（#ff0000）またはrgb()形式を使用する
+            - 文字の太さ変更は「font-weight」プロパティを使用し、bold, normal, 100-900の数値を使用する
             
             ユーザーリクエスト
             {{USER_REQ}}
@@ -83,11 +110,13 @@ pub async fn send_message(_req: SendMessageRequest) -> Result<SendMessageRespons
         let prompt = prompt_template
             .replace("{USER_REQ}", &_req.text)
             .replace("{MESSAGE_CONTEXT}", &format!(
-                "現在のメッセージ一覧:\n{}",
+                "現在のメッセージ一覧（総数: {}）:\n{}\n\n注意: ユーザーが新しいメッセージを送信した後、AIの返信メッセージのIDは {} になります。",
+                _req.messages.len(),
                 _req.messages.iter()
                     .map(|msg| format!("ID: {}, is_user: {}, text: \"{}\"", msg.id, msg.is_user, msg.text))
                     .collect::<Vec<_>>()
-                    .join("\n")
+                    .join("\n"),
+                _req.messages.len() // 新しいメッセージのID
             ));
 
         // 4. モデル呼び出し
