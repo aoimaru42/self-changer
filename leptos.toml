@@ -1,0 +1,18 @@
+[package]
+name = "self-changer"
+version = "0.1.0"
+edition = "2021"
+
+[build]
+site_root = "site"
+site_pkg_dir = "pkg"
+output_name = "self-changer"
+
+[serve]
+reload_port = 3001
+hot_reload = true
+
+[env]
+LEPTOS_SITE_ROOT = "site"
+LEPTOS_SITE_PKG_DIR = "pkg"
+LEPTOS_OUTPUT_NAME = "self-changer"

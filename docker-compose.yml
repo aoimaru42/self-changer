@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  # 開発環境
+  self-changer-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - LEPTOS_OUTPUT_NAME=self-changer
+      - LEPTOS_SITE_ROOT=site
+      - LEPTOS_SITE_PKG_DIR=pkg
+      - LEPTOS_SITE_ADDR=0.0.0.0:3000
+      - LEPTOS_RELOAD_PORT=3001
+    volumes:
+      - .:/app
+      - /app/target
+    profiles:
+      - development
+    restart: unless-stopped
+
+  # 本番環境
+  self-changer-prod:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - LEPTOS_OUTPUT_NAME=self-changer
+      - LEPTOS_SITE_ROOT=site
+      - LEPTOS_SITE_PKG_DIR=pkg
+      - LEPTOS_SITE_ADDR=0.0.0.0:3000
+      - LEPTOS_RELOAD_PORT=3001
+    profiles:
+      - production
+    restart: unless-stopped
+
+  # 開発用のホットリロード環境（オプション）
+  self-changer-watch:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+      - "3001:3001"  # リロードポート
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - LEPTOS_OUTPUT_NAME=self-changer
+      - LEPTOS_SITE_ROOT=site
+      - LEPTOS_SITE_PKG_DIR=pkg
+      - LEPTOS_SITE_ADDR=0.0.0.0:3000
+      - LEPTOS_RELOAD_PORT=3001
+    volumes:
+      - .:/app
+      - /app/target
+    profiles:
+      - watch
+    restart: unless-stopped

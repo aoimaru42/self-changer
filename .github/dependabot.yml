@@ -1,0 +1,22 @@
+version: 2
+updates:
+  # Rust dependencies
+  - package-ecosystem: "cargo"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 30
+    
+  # Node.js dependencies
+  - package-ecosystem: "npm"
+    directory: "/end2end"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 30
+    
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 30
