@@ -1,5 +1,5 @@
 # Multi-stage build for Rust application
-FROM rust:1.82-slim as builder
+FROM rust:latest as builder
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -9,14 +9,20 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Install cargo-leptos
-RUN cargo install cargo-leptos@0.2.28 --locked
+RUN cargo install cargo-leptos@0.2.44 --locked
 
 # Add WebAssembly target
 RUN rustup target add wasm32-unknown-unknown
 
-# Add WebAssembly target for nightly (used by rust-toolchain.toml)
+# Install nightly toolchain with rust-src component
 RUN rustup toolchain install nightly --component rust-src
 RUN rustup target add wasm32-unknown-unknown --toolchain nightly
+
+# Set nightly as default toolchain
+RUN rustup default nightly
+
+# Enable adt_const_params feature for tachys compatibility
+ENV RUSTFLAGS="-C target-feature=+crt-static"
 
 # Set working directory
 WORKDIR /app
@@ -33,8 +39,8 @@ COPY common/ ./common/
 COPY style/ ./style/
 COPY public/ ./public/
 
-# Build the application
-RUN cargo leptos build --release --features ssr
+# Build the application with adt_const_params feature
+RUN cargo leptos build --release --features ssr,adt_const_params
 
 # Runtime stage
 FROM debian:bookworm-slim
