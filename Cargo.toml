@@ -12,7 +12,7 @@ opt-level = 'z'
 leptos = { version = "0.8.2", features = ["nightly"] }
 leptos_meta = { version = "0.8.2" }
 leptos_router = { version = "0.8.2", features = ["nightly"] }
-leptos_axum = { version = "0.8.2" }
+leptos_axum = { version = "0.8.7" }
 
 axum = "0.8.4"
 cfg-if = "1.0.0"
